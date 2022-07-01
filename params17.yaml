@@ -1,0 +1,86 @@
+path_params:
+  mdm_file_path: D:/Users/W505723/Downloads/Sanitized_dataset/NewSanitisedData/mdm_final_table_sanitized.csv #mdm csv file with wex_id
+  raw_data_ten_years: D:/Users/W505723/Downloads/Sanitized_dataset/EDW_{}_volume_Sanitized.csv #10 yrs of data csv file
+  feature_file_path: D:/Users/W505723/WEX_Data_exploration/EDA_NewSanitisedData/grouped_efd_per_month.csv #extra feature csv file
+  revenue_date_EFD_by_day_path: D:/Users/W505723/WEX_Data_exploration/EDA_NewSanitisedData/mv_features/revenue_date_EFD_by_day.txt #EFD by day txt file
+  daily_gallons_full_path: D:/Users/W505723/WEX_Data_exploration/EDA_NewSanitisedData/mv_features/daily_gallons_full.csv #daily gallons csv file
+  card_counts_full_path: D:/Users/W505723/WEX_Data_exploration/EDA_NewSanitisedData/mv_features/card_counts_sanitized.csv #cards counts csv file
+  
+primary_params:
+  date_year: revenue_year
+  date_month: revenue_month
+  forecast_target_column: puchase_gallons_qty
+  business_program_name: Wright Express Fleet Universal
+  
+global_params:
+  choice: 2 #choice = int(input('Do you want to:  \n 1. Forecast(Enter 1)\n 2. Forecast and Compare(Enter 2)\n'))
+  granularity_level: partyparentid
+  models: ['HW','ARIMAX','XGB','LSTM_Multivariate']
+  model_for_exception_accounts: ARIMAX
+  current_month: 2018-12-01  #last data point of known data
+  evaluation_window_length: 12 #Selecting the best model
+  future_prediction_months: 24 #Forecast Horizon
+  performance_assessment_window: 12 #For evaluation of forecast 
+  external_feature_list:  ['lag_12','lag_9','lag_6','lag_3','lag_2','lag_1','MA12','MA6','MSD12','MSD6','REV_EQUIVALENT_FUEL_DAY_FACTOR_efd_ma3m','covid_mobility_feature'] #Select the external feat 
+# ['lag_12','lag_9','lag_6','lag_3','lag_2','lag_1','MA12','MA6','MSD12','MSD6','REV_EQUIVALENT_FUEL_DAY_FACTOR_efd_ma3m','lag_active_card_count_12','lag_outstanding_cards_count_12','covid_mobility_feature']
+
+# ['REV_EQUIVALENT_FUEL_DAY_FACTOR_efd',
+#        'REV_EQUIVALENT_FUEL_DAY_FACTOR_efd_ma3m',
+#        'REV_EQUIVALENT_FUEL_DAY_FACTOR_efd_ma6m', 'lag_6', 'lag_12',
+#        'MA6', 'MA12',  'MSD6', 'MSD12', 'expanding_mean',
+#        'ExpMA6', 'ExpMA12',  'ExpSM6', 'ExpSM12',
+#        'BollingerBand_High_6', 'BollingerBand_Low_6',
+#        'BollingerBand_High_12', 'BollingerBand_Low_12']
+
+#Model Parameters
+lstm_params:
+  window_size_lstm: 36
+  optimizer: adam
+  loss: mean_squared_error
+  
+multivariate_lstm_params:
+  train_period_lstm_model: 9
+  pred_period_lstm_model: 1
+  num_units_lstm_model: 64
+  optimizer_lstm_model: adam
+  loss_function_lstm_model: mean_squared_error
+  batch_size_lstm_model: 10
+  num_epochs_lstm_model: 70
+  
+hw_params:
+  trend: mul
+  seasonal: mul
+  seasonal_period: 12
+  alpha: 0.3
+  beta: 0.16
+  gamma: 0.3
+#   alpha: 0.30000000000000004
+#   beta: 0.30000000000000004
+#   gamma: 0.23333333333333334
+
+  
+arimax_params:
+  information_criterion: aic
+  seasonal: True
+  n_jobs: -1
+
+xgboost_params:
+  learning_rate: [0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5]
+  n_estimators: [10, 30, 50, 100, 300, 500, 600, 700, 900, 1000]
+  subsample: [0.1, 0.2, 0.3, 0.5, 0.7, 0.9, 1]
+  max_depth: [1, 3, 5]
+  colsample_bytree: [0.5, 0.7, 0.9, 1]
+  min_child_weight: [1, 2, 3]
+
+## LSTM parameters for EFD prediction
+efd_lstm_params:
+  lstm_train_window_length: 24
+  num_units: 16
+  activation_function: relu
+  optimizer: adam
+  loss_function: mean_squared_error
+  batch_size: 16
+  num_epochs: 100
+  MODELS: ['efd', 'efd_ma3m', 'efd_ma6m']
+  ma_mapping: {'efd_ma3m':91, 'efd_ma6m':182}
+  
